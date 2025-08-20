@@ -16,15 +16,16 @@ namespace yt_watchlist_Selenium.Pages
             _driver.Navigate().GoToUrl("https://www.youtube.com");
         }
 
-        private By AcceptCookiesButton => By.XPath("//button[contains(., 'Accept all') or contains(., 'Zgadzam się')]");
-
         public void AcceptCookies()
         {
             try
             {
                 var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
-                var button = wait.Until(ExpectedConditions.ElementToBeClickable(AcceptCookiesButton));
-                button.Click();
+
+                var btn = wait.Until(ExpectedConditions.ElementToBeClickable(
+                    By.CssSelector("button[aria-label*='Accept']")));
+
+                btn.Click();
             }
             catch (WebDriverTimeoutException)
             {
@@ -36,9 +37,9 @@ namespace yt_watchlist_Selenium.Pages
         {
             try
             {
-                var signIn = new WebDriverWait(_driver, TimeSpan.FromSeconds(10))
-                    .Until(ExpectedConditions.ElementToBeClickable(
-                        By.XPath("//yt-button-renderer[@id='sign-in-button']")));
+                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+                var signIn = wait.Until(ExpectedConditions.ElementToBeClickable(
+                    By.CssSelector("a[aria-label='Sign in']")));
                 signIn.Click();
             }
             catch
