@@ -50,3 +50,47 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# ---- Build artifacts ----
+bin/
+obj/
+out/
+TestResults/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+
+# ---- Visual Studio / Rider ----
+.vs/
+.idea/
+*.user
+*.suo
+
+# ---- NuGet ----
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.assets.json
+
+# ---- Auto-generated files ----
+*.g.cs
+*.AssemblyInfo.cs
+
+# ---- OS specific ----
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+
+# ---- Others ----
+# JetBrains Rider
+.idea/
+# Visual Studio Code
+.vscode/
