@@ -1,4 +1,3 @@
-// Tests/WatchlistTests.cs
 using System;
 using System.IO;
 using System.Linq;
@@ -14,9 +13,13 @@ namespace yt_watchlist_Selenium.Tests
         [Test]
         public void Clean_WatchLater_By_Channels_From_File()
         {
-            var login = (string) Config!["YouTube"]!["Login"]!;
-            var password = (string) Config!["YouTube"]!["Password"]!;
-            var channelsFile = (string) Config!["Paths"]!["ChannelsFile"]!;
+            var login        = Configuration["YouTube:Login"]    ?? throw new InvalidOperationException("Missing YouTube:Login");
+            var password     = Configuration["YouTube:Password"] ?? throw new InvalidOperationException("Missing YouTube:Password");
+            var channelsFile = Configuration["Paths:ChannelsFile"] ?? throw new InvalidOperationException("Missing Paths:ChannelsFile");
+
+            var channelsPath = Path.IsPathRooted(channelsFile)
+                ? channelsFile
+                : Path.Combine(AppContext.BaseDirectory, channelsFile);
 
             var loginPage = new LoginPage(Driver);
             loginPage.NavigateHome();
@@ -27,17 +30,17 @@ namespace yt_watchlist_Selenium.Tests
             var watchlist = new WatchlistPage(Driver);
             watchlist.OpenWatchLater();
 
-            var channels = File.ReadAllLines(channelsFile)
-                               .Select(l => (l ?? string.Empty).Trim())
-                               .Where(l => !string.IsNullOrWhiteSpace(l))
-                               .Distinct(StringComparer.OrdinalIgnoreCase)
-                               .ToList();
+            var channels = File.ReadAllLines(channelsPath)
+                   .Select(l => (l ?? string.Empty).Trim())
+                   .Where(l => !string.IsNullOrWhiteSpace(l))
+                   .Distinct(StringComparer.OrdinalIgnoreCase)
+                   .ToList();
 
-            TestContext.WriteLine($"Kanały do wyczyszczenia: {string.Join(", ", channels)}");
+            TestContext.WriteLine($"Channels to delete: {string.Join(", ", channels)}");
 
             foreach (var ch in channels)
             {
-                TestContext.WriteLine($"Czyszczę kanał: {ch}");
+                TestContext.WriteLine($"Deleting: {ch}");
                 watchlist.DeleteAllFromChannel(ch);
             }
         }

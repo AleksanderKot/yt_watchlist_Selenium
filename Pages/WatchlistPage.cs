@@ -1,4 +1,3 @@
-// Pages/WatchlistPage.cs
 using System;
 using System.Linq;
 using OpenQA.Selenium;

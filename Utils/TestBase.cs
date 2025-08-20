@@ -1,28 +1,29 @@
 using System;
-using System.IO;
-using System.Text.Json;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using Microsoft.Extensions.Configuration;
 
 namespace yt_watchlist_Selenium.Utils
 {
     public class TestBase
     {
         protected IWebDriver Driver = null!;
-        protected dynamic Config = null!;
+        protected IConfiguration Configuration = null!;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            var json = File.ReadAllText("appsettings.json");
-            Config = JsonSerializer.Deserialize<dynamic>(json);
+            Configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+                .Build();
         }
 
         [SetUp]
         public void SetUp()
         {
-            var headless = (bool?)Config?["Browser"]?["Headless"] ?? true;
+            var headless = Configuration.GetValue<bool>("Browser:Headless");
 
             var options = new ChromeOptions();
             if (headless) options.AddArgument("--headless=new");
@@ -32,22 +33,13 @@ namespace yt_watchlist_Selenium.Utils
             options.AddArgument("--disable-infobars");
 
             Driver = new ChromeDriver(options);
-
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(0);
         }
 
         [TearDown]
         public void TearDown()
         {
-            try
-            {
-                Driver.Quit();
-                Driver.Dispose();
-            }
-            catch (Exception)
-            {
-                /* Ignore */
-            }
+            try { Driver.Quit(); Driver.Dispose(); } catch { }
         }
     }
 }
