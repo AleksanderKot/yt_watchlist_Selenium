@@ -12,7 +12,6 @@ namespace yt_watchlist_Selenium.Pages
         private readonly IWebDriver _driver;
         public WatchlistPage(IWebDriver driver) => _driver = driver;
 
-        // Lokatory
         private By PlaylistVideo => By.XPath("//ytd-playlist-video-renderer");
         private By MenuItems => By.XPath("//ytd-menu-service-item-renderer//tp-yt-paper-item");
         private By VideoMenuButtonWithin(IWebElement video) => By.XPath(".//div[@id='menu']//button[@id='button']");

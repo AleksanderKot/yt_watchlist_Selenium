@@ -39,40 +39,37 @@ namespace yt_watchlist_Selenium.Pages
 
         public void ClickSignIn()
         {
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
+            int attempts = 0;
 
-            try
+            while (attempts < 3)
             {
-                var signIn = wait.Until(ExpectedConditions.ElementToBeClickable(
-                    By.XPath("//*[@id='buttons']/ytd-button-renderer/yt-button-shape/a")
-                ));
-                signIn.Click();
-            }
-            catch (WebDriverTimeoutException)
-            {
-                // If you delete THIS comment line the script won't work (idk why) 
-                var alt = _driver.FindElements(By.XPath("//a[@aria-label='Sign in' and contains(@href,'ServiceLogin')]"));
-                if (alt.Count > 0)
+                try
                 {
-                    alt[0].Click();
+                    var signIn = wait.Until(ExpectedConditions.ElementToBeClickable(
+                        By.XPath("//*[@id='buttons']/ytd-button-renderer/yt-button-shape/a")
+                    ));
+                    signIn.Click();
+                    return;
                 }
-                else
+                catch (StaleElementReferenceException)
                 {
-                    throw new Exception("Sign in button not found on the page.");
+                    attempts++;
+                    Console.WriteLine("Retrying click due to stale element...");
                 }
-            }
-            catch (StaleElementReferenceException)
-            {
-                var retry = _driver.FindElements(By.XPath("//*[@id='buttons']/ytd-button-renderer/yt-button-shape/a"));
-                if (retry.Count > 0)
+                catch (WebDriverTimeoutException)
                 {
-                    retry[0].Click();
-                }
-                else
-                {
-                    throw new Exception("Sign in button not found after retry.");
+                    var alt = _driver.FindElements(By.XPath("//a[@aria-label='Sign in' and contains(@href,'ServiceLogin')]"));
+                    if (alt.Count > 0)
+                    {
+                        alt[0].Click();
+                        return;
+                    }
+                    attempts++;
                 }
             }
+
+            throw new Exception("Sign in button not found after retries.");
         }
 
         public void LoginWithGoogle(string email, string password)
