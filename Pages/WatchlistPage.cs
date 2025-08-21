@@ -12,9 +12,10 @@ namespace yt_watchlist_Selenium.Pages
         private readonly IWebDriver _driver;
         public WatchlistPage(IWebDriver driver) => _driver = driver;
 
-        private By PlaylistVideo => By.CssSelector("ytd-playlist-video-renderer");
-        private By MenuItems => By.CssSelector("ytd-menu-service-item-renderer tp-yt-paper-item");
-        private By VideoMenuButtonWithin(IWebElement video) => By.CssSelector("div#menu button#button");
+        // Lokatory
+        private By PlaylistVideo => By.XPath("//ytd-playlist-video-renderer");
+        private By MenuItems => By.XPath("//ytd-menu-service-item-renderer//tp-yt-paper-item");
+        private By VideoMenuButtonWithin(IWebElement video) => By.XPath(".//div[@id='menu']//button[@id='button']");
 
         public void OpenWatchLater()
         {
@@ -27,7 +28,7 @@ namespace yt_watchlist_Selenium.Pages
         {
             try
             {
-                var channel = video.FindElement(By.CssSelector("div#byline-container a[href*='/@']"));
+                var channel = video.FindElement(By.XPath(".//div[@id='byline-container']//a[contains(@href,'/@')]"));
                 return channel.Text?.Trim();
             }
             catch { return null; }
@@ -79,12 +80,11 @@ namespace yt_watchlist_Selenium.Pages
             target.Click();
 
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-            wait.Until(_ =>
+            wait.Until(driver =>
             {
                 try
                 {
-                    var _x = video.Displayed;
-                    return false;
+                    return !video.Displayed;
                 }
                 catch (StaleElementReferenceException)
                 {

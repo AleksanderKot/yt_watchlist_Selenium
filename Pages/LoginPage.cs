@@ -23,48 +23,77 @@ namespace yt_watchlist_Selenium.Pages
                 var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
 
                 var btn = wait.Until(ExpectedConditions.ElementToBeClickable(
-                    By.CssSelector("button[aria-label*='Accept']")));
-
+                    By.XPath("//*[@id='content']/div[2]/div[6]/div[1]/ytd-button-renderer[2]/yt-button-shape/button")));
                 btn.Click();
             }
             catch (WebDriverTimeoutException)
             {
                 Console.WriteLine("Cookies popup not shown.");
             }
+            catch (ElementClickInterceptedException)
+            {
+                var btn = _driver.FindElement(By.XPath("//*[@id='content']/div[2]/div[6]/div[1]/ytd-button-renderer[2]/yt-button-shape/button"));
+                ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", btn);
+            }
         }
 
         public void ClickSignIn()
         {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+
             try
             {
-                var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
                 var signIn = wait.Until(ExpectedConditions.ElementToBeClickable(
-                    By.CssSelector("a[aria-label='Sign in']")));
+                    By.XPath("//*[@id='buttons']/ytd-button-renderer/yt-button-shape/a")
+                ));
                 signIn.Click();
             }
-            catch
+            catch (WebDriverTimeoutException)
             {
-                var anySignIn = _driver.FindElements(By.CssSelector("a[href*='ServiceLogin']"));
-                if (anySignIn.Count > 0) anySignIn[0].Click();
-                else throw new Exception("Sign in button not found");
+                // If you delete THIS comment line the script won't work (idk why) 
+                var alt = _driver.FindElements(By.XPath("//a[@aria-label='Sign in' and contains(@href,'ServiceLogin')]"));
+                if (alt.Count > 0)
+                {
+                    alt[0].Click();
+                }
+                else
+                {
+                    throw new Exception("Sign in button not found on the page.");
+                }
+            }
+            catch (StaleElementReferenceException)
+            {
+                var retry = _driver.FindElements(By.XPath("//*[@id='buttons']/ytd-button-renderer/yt-button-shape/a"));
+                if (retry.Count > 0)
+                {
+                    retry[0].Click();
+                }
+                else
+                {
+                    throw new Exception("Sign in button not found after retry.");
+                }
             }
         }
 
         public void LoginWithGoogle(string email, string password)
         {
-            var emailInput = Wait.WaitVisible(_driver, By.Id("identifierId"));
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
+
+            var emailInput = wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("//*[@id='identifierId']")));
             emailInput.Clear();
             emailInput.SendKeys(email);
-            _driver.FindElement(By.Id("identifierNext")).Click();
 
-            var passwordInput = new WebDriverWait(_driver, TimeSpan.FromSeconds(20))
-                .Until(ExpectedConditions.ElementIsVisible(By.CssSelector("input[type='password']")));
-            passwordInput.Clear();
-            passwordInput.SendKeys(password);
-            _driver.FindElement(By.Id("passwordNext")).Click();
+            _driver.FindElement(By.XPath("//*[@id='identifierNext']/div/button")).Click();
 
-            new WebDriverWait(_driver, TimeSpan.FromSeconds(10))
-                .Until(ExpectedConditions.ElementExists(By.CssSelector("ytd-app")));
+            var passInput = wait.Until(ExpectedConditions.ElementIsVisible(
+                By.XPath("//*[@id='password']/div[1]/div/div[1]/input")));
+            passInput.Clear();
+            passInput.SendKeys(password);
+
+            _driver.FindElement(By.XPath("//*[@id='passwordNext']/div/button")).Click();
+
+            wait.Until(ExpectedConditions.ElementExists(By.XPath("//ytd-app")));
         }
     }
 }
